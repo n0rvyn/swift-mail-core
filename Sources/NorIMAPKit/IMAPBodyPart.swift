@@ -58,7 +58,7 @@ public indirect enum IMAPBodyPart: Sendable {
 extension IMAPBodyPart {
 
     /// Returns all `.singlePart` leaves in document order (depth-first).
-    var allSingleParts: [IMAPBodyPart] {
+    public var allSingleParts: [IMAPBodyPart] {
         switch self {
         case .singlePart:
             return [self]
@@ -68,7 +68,7 @@ extension IMAPBodyPart {
     }
 
     /// Returns true if this part is a text/plain single part.
-    var isTextPlain: Bool {
+    public var isTextPlain: Bool {
         if case .singlePart(let type, let subtype, _, _, _, _, _) = self {
             return type == "text" && subtype == "plain"
         }
@@ -76,7 +76,7 @@ extension IMAPBodyPart {
     }
 
     /// Returns true if this part is an attachment (non-text, non-multipart).
-    var isAttachment: Bool {
+    public var isAttachment: Bool {
         if case .singlePart(let type, _, _, _, _, _, _) = self {
             return type != "text" && type != "multipart"
         }
