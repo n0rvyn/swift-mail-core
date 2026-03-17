@@ -13,7 +13,7 @@ import Network
 
 // MARK: - SMTPConnectionError
 
-nonisolated enum SMTPConnectionError: Error, Sendable {
+public nonisolated enum SMTPConnectionError: Error, Sendable {
     case connectionFailed(String)
     case connectionClosed
     case timeout
@@ -25,7 +25,7 @@ nonisolated enum SMTPConnectionError: Error, Sendable {
 
 // MARK: - SMTPConnection
 
-actor SMTPConnection {
+public actor SMTPConnection {
 
     private let connection: NWConnection
     private var buffer: Data = Data()
@@ -45,7 +45,7 @@ actor SMTPConnection {
 
     // MARK: - Connect
 
-    func connect() async throws -> String {
+    public func connect() async throws -> String {
         // Phase 1: wait for NWConnection to reach .ready state.
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             connection.stateUpdateHandler = { [weak self] state in
@@ -79,14 +79,14 @@ actor SMTPConnection {
     // MARK: - Send / Receive
 
     /// Sends a single SMTP command line (appends CRLF automatically).
-    func send(_ command: String) async throws {
+    public func send(_ command: String) async throws {
         let data = (command + "\r\n").data(using: .utf8)!
         try await sendRaw(data)
     }
 
     /// Sends raw data without appending CRLF. Used by SMTPClient.sendData()
     /// for the RFC 5322 message payload which includes its own terminators.
-    func sendRaw(_ data: Data) async throws {
+    public func sendRaw(_ data: Data) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             connection.send(content: data, completion: .contentProcessed { error in
                 if let error {
@@ -98,7 +98,7 @@ actor SMTPConnection {
         }
     }
 
-    func readLine() async throws -> String {
+    public func readLine() async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
             pendingLines.append(continuation)
             drainBuffer()
@@ -107,7 +107,7 @@ actor SMTPConnection {
 
     // MARK: - Disconnect
 
-    func disconnect() {
+    public func disconnect() {
         connection.cancel()
     }
 

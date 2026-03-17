@@ -14,7 +14,7 @@ import NorIMAPKit
 
 // MARK: - SMTPError
 
-nonisolated enum SMTPError: Error, Sendable {
+public nonisolated enum SMTPError: Error, Sendable {
     case connectionFailed(String)
     case authenticationFailed
     case recipientRejected(String)
@@ -24,13 +24,15 @@ nonisolated enum SMTPError: Error, Sendable {
 
 // MARK: - SMTPClient
 
-actor SMTPClient {
+public actor SMTPClient {
+
+    public init() {}
 
     private var connection: SMTPConnection?
 
     // MARK: - Connect
 
-    func connect(host: String, port: UInt16 = 465) async throws {
+    public func connect(host: String, port: UInt16 = 465) async throws {
         let conn = SMTPConnection(host: host, port: port)
         let greeting = try await conn.connect()
         guard greeting.hasPrefix("220") else {
@@ -41,7 +43,7 @@ actor SMTPClient {
 
     // MARK: - EHLO
 
-    func ehlo(domain: String = "mail.app") async throws {
+    public func ehlo(domain: String = "mail.app") async throws {
         let conn = try requireConnection()
         try await conn.send("EHLO \(domain)")
         // EHLO response is multi-line (250-... / 250 ...). Read until 250 SP line.
@@ -54,7 +56,7 @@ actor SMTPClient {
 
     // MARK: - AUTH LOGIN
 
-    func authLogin(username: String, password: String) async throws {
+    public func authLogin(username: String, password: String) async throws {
         let conn = try requireConnection()
         try await conn.send("AUTH LOGIN")
         let challenge1 = try await conn.readLine()
@@ -76,7 +78,7 @@ actor SMTPClient {
 
     // MARK: - MAIL FROM
 
-    func mailFrom(_ address: String) async throws {
+    public func mailFrom(_ address: String) async throws {
         let conn = try requireConnection()
         try await conn.send("MAIL FROM:<\(address)>")
         let response = try await conn.readLine()
@@ -85,7 +87,7 @@ actor SMTPClient {
 
     // MARK: - RCPT TO
 
-    func rcptTo(_ address: String) async throws {
+    public func rcptTo(_ address: String) async throws {
         let conn = try requireConnection()
         try await conn.send("RCPT TO:<\(address)>")
         let response = try await conn.readLine()
@@ -96,7 +98,7 @@ actor SMTPClient {
 
     // MARK: - DATA
 
-    func sendData(from: String, to: String, cc: [String] = [], subject: String, body: String) async throws {
+    public func sendData(from: String, to: String, cc: [String] = [], subject: String, body: String) async throws {
         let conn = try requireConnection()
         try await conn.send("DATA")
         let dataReady = try await conn.readLine()
@@ -158,7 +160,7 @@ actor SMTPClient {
     /// - Base64 encoding per RFC 2045 §6.8 (76-char lines, CRLF separated).
     /// - `Content-Disposition: attachment; filename="..."` per RFC 2183.
     /// - Dot-stuffing applied to the entire assembled message per RFC 5321 §4.5.2.
-    func sendDataMultipart(
+    public func sendDataMultipart(
         from: String,
         to: String,
         cc: [String] = [],
@@ -245,7 +247,7 @@ actor SMTPClient {
 
     // MARK: - QUIT
 
-    func quit() async throws {
+    public func quit() async throws {
         guard let conn = connection else { return }
         try await conn.send("QUIT")
         _ = try? await conn.readLine()   // 221 response; ignore errors on disconnect
